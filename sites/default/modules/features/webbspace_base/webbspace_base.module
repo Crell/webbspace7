@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the WeBBspace base feature.
+ */
+
+include_once('webbspace_base.features.inc');
