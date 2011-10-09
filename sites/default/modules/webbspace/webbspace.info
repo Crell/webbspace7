@@ -1,0 +1,4 @@
+name = "WeBBspace Board"
+description = "WeBBspace customizations that fit nowhere else."
+core = "7.x"
+package = "WeBBspace"

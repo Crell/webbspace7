@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * Computes the value of the position label field on Characters at save time.
+ *
+ * @todo Actually put code here.
+ */
+function computed_field_field_position_label_compute($entity_field, $entity_type, $entity, $field, $instance, $langcode, $items) {
+  // The position label is the Position value and Custom Position value,
+  // concatenated with an &.
+
+
+}
