@@ -14,7 +14,7 @@ function webbspace_location_field_default_fields() {
   $fields['taxonomy_term-location-group_audience'] = array(
     'field_config' => array(
       'active' => '1',
-      'cardinality' => '-1',
+      'cardinality' => '1',
       'deleted' => '0',
       'entity_types' => array(),
       'field_name' => 'group_audience',
