@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the WeBBspace Page Notes feature.
+ */
+
+include_once('webbspace_page_notes.features.inc');

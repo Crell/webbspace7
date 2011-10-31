@@ -1,0 +1,7 @@
+core = "7.x"
+dependencies[] = "page_manager"
+description = "Lists of notes on a board"
+features[ctools][] = "page_manager:pages_default:1"
+features[page_manager_pages][] = "notes_tab"
+name = "WeBBspace Page Notes"
+package = "Features"
