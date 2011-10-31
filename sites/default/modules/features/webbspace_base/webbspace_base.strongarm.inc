@@ -27,6 +27,34 @@ function webbspace_base_strongarm() {
   $strongarm = new stdClass;
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'date_format_long';
+  $strongarm->value = 'l, F j, Y - H:i';
+  $export['date_format_long'] = $strongarm;
+
+  $strongarm = new stdClass;
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'date_format_medium';
+  $strongarm->value = 'D, Y-m-d H:i';
+  $export['date_format_medium'] = $strongarm;
+
+  $strongarm = new stdClass;
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'date_format_short';
+  $strongarm->value = 'Y-m-d H:i';
+  $export['date_format_short'] = $strongarm;
+
+  $strongarm = new stdClass;
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'date_format_webb_date';
+  $strongarm->value = 'd F Y h:i:s a';
+  $export['date_format_webb_date'] = $strongarm;
+
+  $strongarm = new stdClass;
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'install_profile';
   $strongarm->value = 'standard';
   $export['install_profile'] = $strongarm;
