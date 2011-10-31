@@ -86,7 +86,7 @@ function webbspace_news_field_default_fields() {
   $fields['node-news-group_audience'] = array(
     'field_config' => array(
       'active' => '1',
-      'cardinality' => '-1',
+      'cardinality' => '1',
       'deleted' => '0',
       'entity_types' => array(),
       'field_name' => 'group_audience',
@@ -132,7 +132,7 @@ function webbspace_news_field_default_fields() {
       'entity_type' => 'node',
       'field_name' => 'group_audience',
       'label' => 'Groups audience',
-      'required' => FALSE,
+      'required' => 0,
       'settings' => array(
         'user_register_form' => FALSE,
       ),
@@ -149,12 +149,13 @@ function webbspace_news_field_default_fields() {
         ),
       ),
       'widget' => array(
+        'active' => 1,
         'module' => 'og',
         'settings' => array(
           'opt_group' => 'auto',
         ),
         'type' => 'group_audience',
-        'weight' => '0',
+        'weight' => 0,
       ),
       'widget_type' => 'group_audience',
     ),
