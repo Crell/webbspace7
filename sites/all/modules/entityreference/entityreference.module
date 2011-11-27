@@ -25,8 +25,8 @@ function entityreference_field_info() {
     'label' => t('Entity Reference'),
     'description' => t('This field reference another entity.'),
     'settings' => array(
-      // The target entity type, pick node if it exists, or the first entity type if node.
-      'target_type' => ($entity_info = entity_get_info()) && isset($entity_info['node']) ? 'node' : key($entity_info),
+      // Default to the core target entity type node. 
+      'target_type' => 'node',
       // The handler for this field.
       'handler' => 'base',
       // The handler settings.
@@ -188,6 +188,7 @@ function entityreference_field_settings_form($field, $instance, $has_data) {
     '#process' => array('entityreference_render_settings'),
     '#tree' => TRUE,
     '#field' => $field,
+    '#instance' => $instance,
   );
 
   return $form;
@@ -212,11 +213,12 @@ function entityreference_render_settings($element, $form_state) {
 
   // Rebuild the field configuration based on the submitted structure.
   $field = $element['#field'];
+  $instance = $element['#instance'];
   if (isset($form_state['values']['field']['settings'])) {
     $field['settings'] = $form_state['values']['field']['settings'] + $field['settings'];
   }
 
-  $element += call_user_func(array($class, 'settingsForm'), $field);
+  $element += call_user_func(array($class, 'settingsForm'), $field, $instance);
   return $element;
 }
 
