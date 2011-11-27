@@ -10,9 +10,7 @@ function computed_field_field_position_label_compute($entity_field, $entity_type
   // The position label is the Position value and Custom Position value,
   // concatenated with an &.
 
-
 }
-
 
 /**
  * Computes the display of the position label field on Charaters, at view time.
@@ -21,5 +19,28 @@ function computed_field_field_position_label_compute($entity_field, $entity_type
  * @todo Actually put code here. Probably just display it literally.
  */
 function computed_field_field_position_label_display($field, $entity_field_item, $entity_lang, $langcode) {
+  return $entity_field_item['value'];
+}
+
+/**
+ * Computes the value of the character label field on Notes at save time.
+ *
+ * @see _computed_field_compute_value()
+ * @todo Actually put code here.
+ */
+function computed_field_field_character_label_compute($entity_field, $entity_type, $entity, $field, $instance, $langcode, $items) {
+  // The character label is the Rank, name, and position of the character at the
+  // time the node is saved.  Note that the character hast o be loaded via a
+  // reference field.
+
+}
+
+/**
+ * Computes the display of the position label field on Charaters, at view time.
+ *
+ * @see computed_field_field_formatter_view()
+ * @todo Actually put code here. Probably just display it literally.
+ */
+function computed_field_field_character_label_display($field, $entity_field_item, $entity_lang, $langcode) {
   return $entity_field_item['value'];
 }
