@@ -12,11 +12,9 @@ function computed_field_field_position_label_compute(&$entity_field, $entity_typ
   $positions = array();
 
   // Currently the field is configured to be single-value, but just to be
-  // on the safe side we'll treat it as multi-value.
-  $tids = array();
-  foreach (field_get_items($entity_type, $entity, 'field_position') as $term) {
-    $tids[] = $term['tid'];
-  }
+  // on the safe side we'll treat it as multi-value. Besides, it means we get
+  // to use an anonymous function. :-)
+  $tids = array_map(function($term) { return $term['tid']; }, field_get_items($entity_type, $entity, 'field_position'));
 
   foreach (taxonomy_term_load_multiple($tids) as $term) {
     $positions[] = entity_label('taxonomy_term', $term);
