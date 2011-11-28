@@ -1,0 +1,114 @@
+<?php
+
+/**
+ * Implements of hook_views_api().
+ */
+function views_tree_views_api() {
+  return array(
+    'api' => '3.0-alpha1',
+    'path' => drupal_get_path('module', 'views_tree'),
+  );
+}
+
+/**
+ * Implements of hook_theme().
+ */
+function views_tree_theme($existing, $type, $theme, $path) {
+  return array(
+    'views_tree' => array(
+      'variables' => array(
+        'view' => NULL,
+        'options' => array(),
+        'rows' => array(),
+        'title' => NULL,
+      ),
+    ),
+    'views_tree_inner' => array(
+      'variables' => array(
+        'view' => NULL,
+        'options' => array(),
+        'rows' => array(),
+        'title' => NULL,
+        'result' => array(),
+        'parent' => NULL,
+      ),
+    ),
+  );
+}
+
+/**
+ * Theme function for the tree style plugin.
+ *
+ * We need to do some weirdness that makes more sense as a theme function
+ * than as a template.
+ *
+ * @ingroup themeable
+ * @link http://drupal.org/node/355919
+ */
+function theme_views_tree($variables) {
+  $view = $variables['view'];
+  $options = $variables['options'];
+  $rows = $variables['rows'];
+  $title = $variables['title'];
+
+  $result = $view->result;
+  $fields = &$view->field;
+
+  $options['main_field_property'] = $fields[$options['main_field']]->field_alias;
+  $options['parent_field_property'] = $fields[$options['parent_field']]->field_alias;
+
+  // Normalize the top level of records to all point to 0 as their parent
+  // We only have to do this once, so we do it here in the wrapping function.
+  $parents = array();
+  foreach ($result as $record) {
+    $parents[] = $record->$options['main_field_property'];
+  }
+  foreach ($result as $record) {
+    if (! in_array($record->$options['parent_field_property'], $parents)) {
+      $record->$options['parent_field_property'] = 0;
+    }
+  }
+
+  $tree = theme('views_tree_inner', array(
+    'view' => $view,
+    'options' => $options,
+    'rows' => $rows,
+    'title' => $title,
+    'result' => $result,
+    'parent' => 0,
+    )
+  );
+
+  return $title . $tree;
+}
+
+/**
+ * Inner recursive theme function for views tree theming.
+ *
+ * @ingroup themeable
+ * @param $view
+ * @param $options
+ * @param $row
+ * @param $title
+ * @param $result
+ *   An array representing the raw data returned from the query.
+ * @param $parent
+ *   The id of the parent entry in the call stack.
+ */
+function theme_views_tree_inner($variables) {
+  $view = $variables['view'];
+  $options = $variables['options'];
+  $rows = $variables['rows'];
+  $title = $variables['title'];
+  $result = $variables['result'];
+  $parent = $variables['parent'];
+
+  $items = array();
+  foreach ($result as $i => $record) {
+    if ($record->$options['parent_field_property'] == $parent) {
+      $variables['parent'] = $record->$options['main_field_property'];
+      $items[] = $rows[$i] . call_user_func(__FUNCTION__, $variables);
+    }
+  }
+  return count($items) ? theme('item_list', array('items' => $items, 'type' => $options['type'])) : '';
+}
