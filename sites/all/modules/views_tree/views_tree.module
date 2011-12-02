@@ -54,21 +54,33 @@ function theme_views_tree($variables) {
   $result = $view->result;
   $fields = &$view->field;
 
-  $options['main_field_property'] = $fields[$options['main_field']]->field_alias;
-  $options['parent_field_property'] = $fields[$options['parent_field']]->field_alias;
+  $parents = array();
+
+  // The field structure of Field API fields in a views result object is...
+  // ridiculous.  To avoid having to deal with it, we'll first iterate over all
+  // records and normalize out the main and parent IDs to new properties. That
+  // vastly simplifies the code that follows.  This particular magic
+  // incantation extracts the value from each record for the appropriate field
+  // specified by the user.  It then normalizes that value down to just an int,
+  // even though in some cases it is an array.  See views_tree_normalize_key().
+  // Finally, we build up a list of all main keys in the result set so that
+  // we can normalize top-level records below.
+  foreach ($result as $i => $record) {
+    $result[$i]->views_tree_main = views_tree_normalize_key($fields[$options['main_field']]->get_value($record), $fields[$options['main_field']]);
+    $result[$i]->views_tree_parent = views_tree_normalize_key($fields[$options['parent_field']]->get_value($record), $fields[$options['parent_field']]);
+
+    $parents[] = $record->views_tree_main;
+  }
 
   // Normalize the top level of records to all point to 0 as their parent
   // We only have to do this once, so we do it here in the wrapping function.
-  $parents = array();
-  foreach ($result as $record) {
-    $parents[] = $record->$options['main_field_property'];
-  }
-  foreach ($result as $record) {
-    if (! in_array($record->$options['parent_field_property'], $parents)) {
-      $record->$options['parent_field_property'] = 0;
+  foreach ($result as $i => $record) {
+    if (! in_array($record->views_tree_parent, $parents)) {
+      $result[$i]->views_tree_parent = 0;
     }
   }
 
+  // Recursively render each item.
   $tree = theme('views_tree_inner', array(
     'view' => $view,
     'options' => $options,
@@ -105,10 +117,49 @@ function theme_views_tree_inner($variables) {
 
   $items = array();
   foreach ($result as $i => $record) {
-    if ($record->$options['parent_field_property'] == $parent) {
-      $variables['parent'] = $record->$options['main_field_property'];
+    if ($record->views_tree_parent == $parent) {
+      $variables['parent'] = $record->views_tree_main;
       $items[] = $rows[$i] . call_user_func(__FUNCTION__, $variables);
     }
   }
   return count($items) ? theme('item_list', array('items' => $items, 'type' => $options['type'])) : '';
+}
+
+/**
+ * Normalize a value out of the record to an int.
+ *
+ * If the field in question comes from Field API, then it will be an array, not
+ * an int.  We need to detect that and extract the int value we want from it.
+ * Note that because Field API structures are so free-form, we have to specifically
+ * support each field type.  For right now we support entityreference (target_id),
+ * nodereference (nid), userreference (uid), and taxonomyreference (tid).
+ *
+ * @param mixed $value
+ *   The value to normalize.  It should be either an int or an array. If an int,
+ *   it is returned unaltered.  If it's an array, we extract the int we want
+ *   and return that.
+ * @param views_handler_field $field
+ *   Metadata about the field we are extracting information from.
+ * @return int
+ *   The value of this key, normalized to an int.
+ */
+function views_tree_normalize_key($value, views_handler_field $field) {
+  if (is_array($value) && count($value)) {
+    if (isset($field->field_info['columns'])) {
+      $columns = array_keys($field->field_info['columns']);
+      foreach ($columns as $column) {
+        if (in_array($column, array('target_id', 'nid', 'uid', 'tid'))) {
+          $field_property = $column;
+          break;
+        }
+      }
+    }
+    else {
+      $field_property = '';
+    }
+    return $field_property ? $value[0][$field_property] : 0;
+  }
+  else {
+    return $value ? $value : 0;
+  }
 }
