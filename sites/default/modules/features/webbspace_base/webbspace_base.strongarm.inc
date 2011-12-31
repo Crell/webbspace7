@@ -49,7 +49,7 @@ function webbspace_base_strongarm() {
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
   $strongarm->name = 'date_format_webb_date';
-  $strongarm->value = 'd F Y h:i:s a';
+  $strongarm->value = 'd F Y h:i a';
   $export['date_format_webb_date'] = $strongarm;
 
   $strongarm = new stdClass;
