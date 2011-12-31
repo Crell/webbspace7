@@ -17,6 +17,8 @@ class views_tree_plugin_style_tree extends views_plugin_style_list {
    */
   function option_definition() {
     $options = parent::option_definition();
+    $options['class'] = array('default' => '');
+    $options['wrapper_class'] = array('default' => 'item-list');
     $options['main_field'] = array('default' => '');
     $options['parent_field'] = array('default' => '');
 

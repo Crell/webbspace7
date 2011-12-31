@@ -56,6 +56,16 @@ function theme_views_tree($variables) {
 
   $parents = array();
 
+  if (! $fields[$options['main_field']] instanceof views_handler_field) {
+    drupal_set_message(t('Main field is invalid: %field', array('%field' => $options['main_field'])), 'error');
+    return '';
+  }
+
+  if (! $fields[$options['parent_field']] instanceof views_handler_field) {
+    drupal_set_message(t('Parent field is invalid: %field', array('%field' => $options['parent_field'])), 'error');
+    return '';
+  }
+
   // The field structure of Field API fields in a views result object is...
   // ridiculous.  To avoid having to deal with it, we'll first iterate over all
   // records and normalize out the main and parent IDs to new properties. That
