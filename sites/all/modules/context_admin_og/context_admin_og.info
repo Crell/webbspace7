@@ -1,0 +1,13 @@
+name = Contextual Administration OG
+description = A Contextual Administration plugin that uses the OG context to prepopulate the group audience field on node create forms.
+core = 7.x
+package = Contextual Administration
+dependencies[] = context_admin
+dependencies[] = og
+
+; Information added by drupal.org packaging script on 2011-12-02
+version = "7.x-1.0"
+core = "7.x"
+project = "context_admin_og"
+datestamp = "1322864438"
+

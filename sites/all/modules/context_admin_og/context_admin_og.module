@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * A Contextual Administration plugin that uses the OG context to prepopulate
+ * the group audience field on node create forms.
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function context_admin_og_ctools_plugin_directory($owner, $plugin_type) {
+  if ('context_admin' == $owner) {
+    return 'plugins/' . $plugin_type;
+  }
+}
