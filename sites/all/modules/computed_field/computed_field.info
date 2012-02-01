@@ -2,12 +2,12 @@ name = Computed Field
 description = Defines a field type that allows values to be "computed" via PHP code.
 core = 7.x
 dependencies[] = field
-package = Field
+package = Fields
 files[]=computed_field.install
 files[]=computed_field.module
-; Information added by drupal.org packaging script on 2011-03-07
+; Information added by drupal.org packaging script on 2012-02-01
 version = "7.x-1.x-dev"
 core = "7.x"
 project = "computed_field"
-datestamp = "1299456217"
+datestamp = "1328055186"
 

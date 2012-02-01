@@ -25,8 +25,33 @@ function computed_field_field_info() {
       ),
       'default_widget' => 'computed',
       'default_formatter' => 'computed_field_default',
+      // If we followed the core convention of separate fields for each data
+      // type we could make Entity API happy by just setting a property_type.
+      // Instead we have to use our own callback to determine the type then
+      // rerun theirs to setup the rest of the field properties.
+      'property_callbacks' => array('computed_field_entity_property_callback'),
     ),
   );
+}
+
+/**
+ * Callback to setup Entity API's field properties.
+ */
+function computed_field_entity_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  $property_types = array(
+    'int' => 'integer',
+    'float' => 'decimal', 'numeric' => 'decimal',
+    'varchar' => 'text', 'text' => 'text', 'longtext' => 'text',
+  );
+  if (isset($property_types[$field['columns']['value']['type']])) {
+    // Entity API's defaults are pretty good so set the property_type and let
+    // them do the work for us.
+    $field_type['property_type'] = $property_types[$field['columns']['value']['type']];
+    entity_metadata_field_default_property_callback($info, $entity_type, $field, $instance, $field_type);
+    // The only thing is that a setter doesn't make sense, so let's disable it.
+    $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
+    unset($property['setter callback']);
+  }
 }
 
 /**
@@ -44,7 +69,7 @@ function computed_field_field_settings_form($field, $instance, $has_data) {
     '#type' => 'textarea',
     '#rows' => 15,
     '#title' => t('Computed Code (PHP)'),
-    '#description' => t('Some variables available to your code include: <code>@fields</code>. To set the value of the field, set <code>@entity_field</code>.  For multi-value computed fields continue with <code>@entity_field_multi</code>.  Here\'s a simple example which sets the computed field\'s value to the value of the sum of the number fields (<code>@field_a</code> and <code>@field_b</code>) in a node entity:<p><code>@example</code><p>Alternately, this code can be supplied by your own custom function named: <code>@compute_func()</code>', 
+    '#description' => t('Some variables available to your code include: <code>@fields</code>. To set the value of the field, set <code>@entity_field</code>.  For multi-value computed fields continue with <code>@entity_field_multi</code>.  Here\'s a simple example which sets the computed field\'s value to the value of the sum of the number fields (<code>@field_a</code> and <code>@field_b</code>) in a node entity:<p><code>@example</code><p>Alternately, this code can be supplied by your own custom function named: <code>@compute_func(&$entity_field, $entity_type, $entity, $field, $instance, $langcode, $items)</code>',
       array('@fields' => '$entity, $entity_type, $entity_lang, &$entity_field and $langcode',
         '@entity_field' => '$entity_field[0][\'value\']',
         '@entity_field_multi' => '$entity_field[1][\'value\']',
@@ -64,7 +89,7 @@ function computed_field_field_settings_form($field, $instance, $has_data) {
   $form['display_format'] = array(
     '#type' => 'textarea',
     '#title' => t('Display Code (PHP)'),
-    '#description' => t('This code should assign a string to the <code>@display_output</code> variable, which will be printed when the field is displayed. The raw computed value of the field is in <code>@value</code>.  <strong>Note:</strong> this code has no effect if you use the "Raw computed value" display formatter.<p> Alternately, this code can be supplied by your own custom function named: <code>@display_func()</code>', 
+    '#description' => t('This code should assign a string to the <code>@display_output</code> variable, which will be printed when the field is displayed. The raw computed value of the field is in <code>@value</code>.  <strong>Note:</strong> this code has no effect if you use the "Raw computed value" display formatter.<p> Alternately, this code can be supplied by your own custom function named: <code>@display_func($field, $entity_field_item, $entity_lang, $langcode)</code>.  Return the value to be displayed.  Original value is in $entity_field_item[\'value\'].', 
       array('@display_output' => '$display_output',
             '@value' => '$entity_field_item[\'value\']',
             '@display_func' => $display_func)),
@@ -346,7 +371,7 @@ function computed_field_field_is_empty($item, $field) {
 }
 
 /**
- * Implements hook_tokens().
+ * Implements hook_token_info().
  */
 function computed_field_token_info() {
   $types['computed'] = array(
@@ -359,7 +384,6 @@ function computed_field_token_info() {
   $computed = array();
   foreach ($fields as $field_name => $field) {
     if ($field['module'] == "computed_field") {
-
       $node[str_replace('_', '-', $field_name)] = array(
         'name' => t("Computed: %field_name", array('%field_name' => $field_name)),
         'description' => t("Computed field %field_name value.", array('%field_name' => $field_name)),
@@ -371,10 +395,12 @@ function computed_field_token_info() {
       );
     }
   }
-  return array(
-    'types' => $types,
-    'tokens' => array('node' => $node, 'computed' => $computed),
-  );
+  if (!empty($computed)) {
+    return array(
+      'types' => $types,
+      'tokens' => array('node' => $node, 'computed' => $computed),
+    );
+  }
 }
 
 /**
