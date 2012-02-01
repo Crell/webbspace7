@@ -129,15 +129,19 @@ function context_admin_og_create_node_form_submit($form, &$form_state) {
  * @see context_admin_node_add_wrapper().
  */
 function context_admin_og_create_node_render_page($handler, $contexts, $args) {
-  $fields = array(
-    'group_audience' => array(
-      'language' => LANGUAGE_NONE,
-      'key' => 'gid',
-      'values' => array(
-        $contexts[$handler->conf['submitted_context']]->data->nid
+  $fields = array();
+
+  // Find the group ID from the nid.
+  $nid = $contexts[$handler->conf['submitted_context']]->data->nid;
+  if ($group = og_get_group('node', $nid)) {
+    $fields = array(
+      'group_audience' => array(
+        'language' => LANGUAGE_NONE,
+        'key' => 'gid',
+        'values' => array($group->gid),
       ),
-    ),
-  );
+    );
+  }
   $use_panels = !empty($handler->conf['use_panels']);
   return context_admin_node_add_wrapper($handler->conf['type'], $fields, $use_panels);
 }
