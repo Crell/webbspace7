@@ -26,6 +26,7 @@ dependencies[] = admin_menu
 dependencies[] = diff
 dependencies[] = devel
 dependencies[] = views_ui
+dependencies[] = advanced_help
 
 
 ; Feature module dependences
