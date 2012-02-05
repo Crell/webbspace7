@@ -5,3 +5,5 @@ features[ctools][] = "page_manager:pages_default:1"
 features[page_manager_pages][] = "notes_tab"
 name = "WeBBspace Page Notes"
 package = "Features"
+
+dependencies[] = panels

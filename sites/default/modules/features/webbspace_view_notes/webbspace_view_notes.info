@@ -7,3 +7,6 @@ features[views_view][] = "notes"
 name = "WeBBspace View Notes"
 package = "Features"
 php = "5.2.4"
+
+dependencies[] = webbspace_base
+dependencies[] = webbspace_note
