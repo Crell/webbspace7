@@ -178,9 +178,9 @@
  * @endcode
  */
 $databases = array (
-  'default' => 
+  'default' =>
   array (
-    'default' => 
+    'default' =>
     array (
       'database' => 'webbspace7',
       'username' => 'test',
@@ -458,6 +458,6 @@ ini_set('session.cookie_lifetime', 2000000);
 # $conf['allow_authorize_operations'] = FALSE;
 
 // Include local configuration file if appropriate.
-if (file_exists('settings.local.php')) {
-  include_once('settings.local.php');
+if (file_exists(__DIR__ . '/settings.local.php')) {
+  include_once(__DIR__ . '/settings.local.php');
 }
