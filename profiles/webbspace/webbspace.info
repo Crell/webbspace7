@@ -1,0 +1,43 @@
+name = WeBBspace
+description = Install profile for the WeBBspace application.
+core = 7.x
+php = 5.3
+
+; Core dependencies
+dependencies[] = block
+dependencies[] = contextual
+dependencies[] = dashboard
+dependencies[] = help
+dependencies[] = image
+dependencies[] = list
+dependencies[] = menu
+dependencies[] = number
+dependencies[] = options
+dependencies[] = path
+dependencies[] = taxonomy
+dependencies[] = dblog
+dependencies[] = field_ui
+dependencies[] = file
+dependencies[] = rdf
+files[] = webbspace.profile
+
+; Contrib dependences
+dependencies[] = admin_menu
+dependencies[] = diff
+dependencies[] = devel
+dependencies[] = views_ui
+
+
+; Feature module dependences
+dependencies[] = webbspace_base
+dependencies[] = webbspace_board
+dependencies[] = webbspace_character
+dependencies[] = webbspace_location
+dependencies[] = webbspace_log_entry
+dependencies[] = webbspace_news
+dependencies[] = webbspace_note
+dependencies[] = webbspace_page
+dependencies[] = webbspace_positions
+dependencies[] = webbspace_ranks
+dependencies[] = webbspace_view_notes
+dependencies[] = webbspace_page_notes
