@@ -152,9 +152,19 @@ function webbspace_note_field_default_fields() {
       'deleted' => '0',
       'entity_types' => array(),
       'field_name' => 'field_character',
-      'foreign keys' => array(),
+      'foreign keys' => array(
+        'node' => array(
+          'columns' => array(
+            'target_id' => 'nid',
+          ),
+          'table' => 'node',
+        ),
+      ),
       'indexes' => array(
         'target_entity' => array(
+          0 => 'target_id',
+        ),
+        'target_id' => array(
           0 => 'target_id',
         ),
       ),
@@ -219,9 +229,19 @@ function webbspace_note_field_default_fields() {
       'deleted' => '0',
       'entity_types' => array(),
       'field_name' => 'field_location',
-      'foreign keys' => array(),
+      'foreign keys' => array(
+        'taxonomy_term_data' => array(
+          'columns' => array(
+            'target_id' => 'tid',
+          ),
+          'table' => 'taxonomy_term_data',
+        ),
+      ),
       'indexes' => array(
         'target_entity' => array(
+          0 => 'target_id',
+        ),
+        'target_id' => array(
           0 => 'target_id',
         ),
       ),
@@ -290,9 +310,19 @@ function webbspace_note_field_default_fields() {
       'deleted' => '0',
       'entity_types' => array(),
       'field_name' => 'field_parent_note',
-      'foreign keys' => array(),
+      'foreign keys' => array(
+        'node' => array(
+          'columns' => array(
+            'target_id' => 'nid',
+          ),
+          'table' => 'node',
+        ),
+      ),
       'indexes' => array(
         'target_entity' => array(
+          0 => 'target_id',
+        ),
+        'target_id' => array(
           0 => 'target_id',
         ),
       ),

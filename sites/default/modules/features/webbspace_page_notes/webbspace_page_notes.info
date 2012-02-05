@@ -1,9 +1,9 @@
-core = "7.x"
-dependencies[] = "page_manager"
+name = "WeBBspace Page Notes"
 description = "Lists of notes on a board"
+core = "7.x"
+package = "Features"
+php = "5.2.4"
+dependencies[] = "page_manager"
+dependencies[] = "panels"
 features[ctools][] = "page_manager:pages_default:1"
 features[page_manager_pages][] = "notes_tab"
-name = "WeBBspace Page Notes"
-package = "Features"
-
-dependencies[] = panels
