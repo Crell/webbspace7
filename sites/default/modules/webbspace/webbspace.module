@@ -55,7 +55,7 @@ function computed_field_field_character_label_compute(&$entity_field, $entity_ty
 
   if ($character_ref) {
     $target_ids = array_map(function($ref) { return $ref['target_id']; }, $character_ref);
-    $target_type = $character_ref[0]['target_type'];
+    $target_type = $instance['entity_type'];
 
     $characters = entity_load_multiple_by_name($target_type, $target_ids);
     foreach ($characters as $character) {
