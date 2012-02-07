@@ -1,0 +1,11 @@
+name = WeBBspace Test Data
+description = Only use this during development to spin up some expected testing data.
+core = 7.x
+
+dependencies[] = webbspace_base
+dependencies[] = webbspace_news
+dependencies[] = webbspace_note
+dependencies[] = webbspace_page
+dependencies[] = webbspace_board
+dependencies[] = webbspace_character
+dependencies[] = webbspace_log_entry

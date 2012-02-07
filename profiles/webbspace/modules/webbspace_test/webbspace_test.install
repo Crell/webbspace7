@@ -1,0 +1,150 @@
+<?php
+
+function webbspace_test_install() {
+
+  $nodes = array();
+  $terms = array();
+
+  webbspace_test_positions($terms);
+  webbspace_test_ranks($terms);
+  webbspace_test_boards($nodes, $terms);
+  webbspace_test_characters($nodes, $terms);
+  webbspace_test_logs($nodes);
+
+}
+
+function webbspace_test_logs(&$nodes) {
+  $node = new stdClass();
+  $node->type = 'board';
+  node_object_prepare($node);
+  $node->language = LANGUAGE_NONE;
+  $node->title =  '';
+  $node->uid = 1;
+  $node->created = REQUEST_TIME;
+  $node->field_body[$node->language][0]['value'] = 'Log entry goes here';
+  $node->field_body[$node->language][0]['format']  = 'filtered_html';
+  $node->group_audience[$node->language][0]['gid'] = $nodes['USS Montgomery'];
+  node_save($node);
+  $nodes[$node->title] = $node->nid;
+
+  $node = new stdClass();
+  $node->type = 'board';
+  node_object_prepare($node);
+  $node->language = LANGUAGE_NONE;
+  $node->title =  '';
+  $node->uid = 1;
+  $node->created = REQUEST_TIME - 86400;
+  $node->field_body[$node->language][0]['value'] = 'Older log entry goes here';
+  $node->field_body[$node->language][0]['format']  = 'filtered_html';
+  $node->group_audience[$node->language][0]['gid'] = $nodes['USS Montgomery'];
+  node_save($node);
+  $nodes[$node->title] = $node->nid;
+}
+
+function webbspace_test_positions(&$terms) {
+
+  $vid = db_query("SELECT vid FROM {taxonomy_vocabulary} WHERE machine_name = 'positions'")->fetchField();
+
+  $term = new stdClass();
+  $term->name = 'Chief Engineer';
+  $term->vid = $vid;
+  taxonomy_term_save($term);
+  $terms[$term->name] = $term->tid;
+
+  $term = new stdClass();
+  $term->name = 'Chief of Security';
+  $term->vid = 1;
+  taxonomy_term_save($term);
+  $terms[$term->name] = $term->tid;
+
+  $term = new stdClass();
+  $term->name = 'Engineer';
+  $term->vid = 1;
+  taxonomy_term_save($term);
+  $terms[$term->name] = $term->tid;
+}
+
+function webbspace_test_ranks(&$terms) {
+
+  $vid = db_query("SELECT vid FROM {taxonomy_vocabulary} WHERE machine_name = 'positions'")->fetchField();
+
+  $term = new stdClass();
+  $term->name = 'Commodore';
+  $term->vid = $vid;
+  taxonomy_term_save($term);
+  $terms[$term->name] = $term->tid;
+
+  $term = new stdClass();
+  $term->name = 'Cadet';
+  $term->vid = $vid;
+  taxonomy_term_save($term);
+  $terms[$term->name] = $term->tid;
+
+  $term = new stdClass();
+  $term->name = 'Ensign';
+  $term->vid = $vid;
+  taxonomy_term_save($term);
+  $terms[$term->name] = $term->tid;
+}
+
+function webbspace_test_characters(&$nodes, &$terms) {
+
+  $node = new stdClass();
+  $node->type = 'character';
+  node_object_prepare($node);
+  $node->language = LANGUAGE_NONE;
+  $node->title =  'Murri Kep';
+  $node->uid = 1;
+  $node->field_body[$node->language][0]['value'] = 'Bio goes here';
+  $node->field_body[$node->language][0]['format']  = 'filtered_html';
+  $node->field_height[$node->language][0]['value']  = '5\' 10"';
+  $node->field_weight[$node->language][0]['value'] = '170 lbs';
+  $node->field_position_custom[$node->language][0]['value'] = '2O';
+  $node->field_rostered[$node->language][0]['value'] = 1;
+  $node->field_species[$node->language][0]['value'] = 'Trill';
+  $node->field_position[$node->language][0]['tid'] = $terms['Chief Engineer'];
+  $node->field_rank[$node->language][0]['tid'] = $terms['Commodore'];
+  $node->group_audience[$node->language][0]['gid'] = $nodes['USS Montgomery'];
+  node_save($node);
+  $nodes[$node->title] = $node->nid;
+
+  $node = new stdClass();
+  $node->type = 'character';
+  node_object_prepare($node);
+  $node->language = LANGUAGE_NONE;
+  $node->title =  'Monty the Pyton';
+  $node->uid = 1;
+  $node->field_body[$node->language][0]['value'] = 'Bio goes here';
+  $node->field_body[$node->language][0]['format']  = 'filtered_html';
+  $node->field_height[$node->language][0]['value']  = '7\'';
+  $node->field_weight[$node->language][0]['value'] = '80 lbs';
+  $node->field_position_custom[$node->language][0]['value'] = 'Mascot';
+  $node->field_rostered[$node->language][0]['value'] = 1;
+  $node->field_species[$node->language][0]['value'] = 'Reptile';
+  $node->field_position[$node->language][0]['tid'] = $terms['Engineer'];
+  $node->field_rank[$node->language][0]['tid'] = $terms['Cadet'];
+  $node->group_audience[$node->language][0]['gid'] = $nodes['USS Montgomery'];
+  node_save($node);
+  $nodes[$node->title] = $node->nid;
+
+}
+
+
+function webbspace_test_boards(&$nodes, &$terms) {
+
+  $node = new stdClass();
+  $node->type = 'board';
+  node_object_prepare($node);
+  $node->language = LANGUAGE_NONE;
+  $node->title =  'USS Montgomery';
+  $node->uid = 1;
+  $node->field_body[$node->language][0]['value'] = 'MOTD goes here';
+  $node->field_body[$node->language][0]['format']  = 'filtered_html';
+  $node->field_group[$node->language][0]['value'] = 1;
+  node_save($node);
+  $nodes[$node->title] = $node->nid;
+}
+
+function webbspace_test_uninstall() {
+
+}
