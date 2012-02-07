@@ -1,0 +1,8 @@
+name = "WeBBspace View Log"
+description = "The Captain's Blog"
+core = "7.x"
+package = "Features"
+dependencies[] = "views"
+dependencies[] = "webbspace_log_entry"
+features[ctools][] = "views:views_default:3.0"
+features[views_view][] = "board_log"
