@@ -13,7 +13,7 @@ function webbspace_view_notes_views_default_views() {
   $view = new view;
   $view->name = 'notes';
   $view->description = 'Lists of notes on a board';
-  $view->tag = 'default';
+  $view->tag = 'webbspace';
   $view->base_table = 'node';
   $view->human_name = 'Notes';
   $view->core = 7;
