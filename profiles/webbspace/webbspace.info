@@ -27,18 +27,26 @@ dependencies[] = diff
 dependencies[] = devel
 dependencies[] = views_ui
 dependencies[] = advanced_help
-
+dependencies[] = module_filter
+dependencies[] = context_admin
+dependencies[] = context_admin_og
+dependencies[] = auto_nodetitle
+dependencies[] = token
 
 ; Feature module dependences
 dependencies[] = webbspace_base
+dependencies[] = webbspace_location
+dependencies[] = webbspace_positions
+dependencies[] = webbspace_ranks
 dependencies[] = webbspace_board
 dependencies[] = webbspace_character
-dependencies[] = webbspace_location
 dependencies[] = webbspace_log_entry
 dependencies[] = webbspace_news
 dependencies[] = webbspace_note
 dependencies[] = webbspace_page
-dependencies[] = webbspace_positions
-dependencies[] = webbspace_ranks
 dependencies[] = webbspace_view_notes
 dependencies[] = webbspace_page_notes
+
+
+; Development-only dependencies
+;dependencies[] = webbspace_test
