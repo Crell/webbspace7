@@ -42,6 +42,14 @@ function webbspace_page_log_add_default_page_manager_pages() {
         'context' => 'argument_entity_id:node_1',
         'not' => FALSE,
       ),
+      3 => array(
+        'name' => 'perm',
+        'settings' => array(
+          'perm' => 'create log_entry content',
+        ),
+        'context' => 'logged-in-user',
+        'not' => FALSE,
+      ),
     ),
     'logic' => 'and',
   );
