@@ -46,6 +46,9 @@ dependencies[] = webbspace_note
 dependencies[] = webbspace_page
 dependencies[] = webbspace_view_notes
 dependencies[] = webbspace_page_notes
+dependencies[] = webbspace_view_log
+dependencies[] = webbspace_page_log
+dependencies[] = webbspace_page_log_add
 
 
 ; Development-only dependencies
