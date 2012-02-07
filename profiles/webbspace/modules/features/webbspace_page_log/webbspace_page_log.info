@@ -1,0 +1,8 @@
+name = "WeBBspace Page Log"
+description = "Captain's Log Page"
+core = "7.x"
+package = "Features"
+dependencies[] = "ctools"
+dependencies[] = "page_manager"
+features[ctools][] = "page_manager:pages_default:1"
+features[page_manager_pages][] = "log_tab"
