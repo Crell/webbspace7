@@ -130,3 +130,12 @@ function computed_field_field_character_label_compute(&$entity_field, $entity_ty
 function computed_field_field_character_label_display($field, $entity_field_item, $entity_lang, $langcode) {
   return check_plain($entity_field_item['value']);
 }
+
+/**
+ * Form alter for context admin node add forms.
+ *
+ * @todo Turn this into a patch against auto_nodetitle.
+ */
+function webbspace_form_context_admin_node_form_wrapper_alter(&$form, &$form_state, $form_id) {
+  auto_nodetitle_form_node_form_alter($form, $form_state, $form_id);
+}
