@@ -221,6 +221,17 @@ function webbspace_install() {
     ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
     ->execute();
 
+  // Set up custom date formats.  These should be in features, but
+  // features/strongarm is kinda busted and doesn't export it properly.
+  system_date_format_save(array(
+    'type' => 'date_format_webb_date',
+    'format' => 'd F Y h:i a',
+  ));
+  system_date_format_type_save(array(
+    'type' => 'date_format_webb_date',
+    'title' => 'WeBB date'
+  ));
+
   // Create a Home link in the main menu.
   $item = array(
     'link_title' => st('Home'),
