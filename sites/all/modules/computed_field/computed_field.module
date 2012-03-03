@@ -24,7 +24,7 @@ function computed_field_field_info() {
         ),
       ),
       'default_widget' => 'computed',
-      'default_formatter' => 'computed_field_default',
+      'default_formatter' => 'computed_field_plain',
       // If we followed the core convention of separate fields for each data
       // type we could make Entity API happy by just setting a property_type.
       // Instead we have to use our own callback to determine the type then
@@ -43,7 +43,7 @@ function computed_field_entity_property_callback(&$info, $entity_type, $field, $
     'float' => 'decimal', 'numeric' => 'decimal',
     'varchar' => 'text', 'text' => 'text', 'longtext' => 'text',
   );
-  if (isset($property_types[$field['columns']['value']['type']])) {
+  if (isset($field['columns']['value']) && isset($property_types[$field['columns']['value']['type']])) {
     // Entity API's defaults are pretty good so set the property_type and let
     // them do the work for us.
     $field_type['property_type'] = $property_types[$field['columns']['value']['type']];
@@ -69,13 +69,13 @@ function computed_field_field_settings_form($field, $instance, $has_data) {
     '#type' => 'textarea',
     '#rows' => 15,
     '#title' => t('Computed Code (PHP)'),
-    '#description' => t('Some variables available to your code include: <code>@fields</code>. To set the value of the field, set <code>@entity_field</code>.  For multi-value computed fields continue with <code>@entity_field_multi</code>.  Here\'s a simple example which sets the computed field\'s value to the value of the sum of the number fields (<code>@field_a</code> and <code>@field_b</code>) in a node entity:<p><code>@example</code><p>Alternately, this code can be supplied by your own custom function named: <code>@compute_func(&$entity_field, $entity_type, $entity, $field, $instance, $langcode, $items)</code>',
-      array('@fields' => '$entity, $entity_type, $entity_lang, &$entity_field and $langcode',
+    '#description' => t('The variables available to your code include: <code>@fields</code>. To set the value of the field, set <code>@entity_field</code>.  For multi-value computed fields continue with <code>@entity_field_multi</code>.  Here\'s a simple example which sets the computed field\'s value to the value of the sum of the number fields (<code>@field_a</code> and <code>@field_b</code>) in a node entity:<p><code>@example</code> The first pop fetches the last (or only) item from the field while the second pop fetches its <code>[\'value\']</code> contents (assuming it\'s the only key that\'s set).<p>Alternately, this code can be supplied by your own custom function named: <code>@compute_func(&$entity_field, $entity_type, $entity, $field, $instance, $langcode, $items)</code>',
+      array('@fields' => '&$entity_field, $entity_type, $entity, $field, $instance, $langcode, and $items',
         '@entity_field' => '$entity_field[0][\'value\']',
         '@entity_field_multi' => '$entity_field[1][\'value\']',
         '@field_a' => 'field_a',
         '@field_b' => 'field_b',
-        '@example' => '$entity_field[0][\'value\'] = $entity->field_a[LANGUAGE_NONE][0][\'value\'] + $entity->field_b[LANGUAGE_NONE][0][\'value\'];',
+        '@example' => '$entity_field[0][\'value\'] = array_pop(array_pop(field_get_items($entity_type, $entity, \'field_a\'))) + array_pop(array_pop(field_get_items($entity_type, $entity, \'field_b\')));',
         '@compute_func' => $compute_func)),
     '#default_value' => !empty($settings['code']) ? $settings['code'] : '$entity_field[0][\'value\'] = "";',
     '#access' => !function_exists($compute_func),
@@ -104,7 +104,8 @@ function computed_field_field_settings_form($field, $instance, $has_data) {
   }
   $form['store'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Store using the database settings below (required for Views use):'),
+    '#title' => t('Store value in the database'),
+    '#description' => t('The value will be stored in the database with the settings below.  As a result, it will only be recalculated when the entity is updated.  This option is required when accessing the field through Views.'),
     '#default_value' => is_numeric($settings['store']) ? $settings['store'] : 1 ,
     '#disabled' => $has_data,
   );
@@ -280,8 +281,8 @@ function computed_field_field_widget_form(&$form, &$form_state, $field, $instanc
  */
 function computed_field_field_formatter_info() {
   return array(
-    'computed_field_default' => array(
-      'label' => t('Default'),
+    'computed_field_unsanitized' => array(
+      'label' => t('Unsanitized'),
       'field types' => array('computed'),
     ),
     'computed_field_plain' => array(
@@ -293,7 +294,7 @@ function computed_field_field_formatter_info() {
       'field types' => array('computed'),
     ),
     'computed_field_computed_value' => array(
-      'label' => t('Raw computed value'),
+      'label' => t('Raw value, no display code'),
       'field types' => array('computed'),
     ),
   );
@@ -345,7 +346,7 @@ function computed_field_field_formatter_view($entity_type, $entity, $field, $ins
     
     // Output the formatted display item
     switch ($display['type']) {
-      case 'computed_field_default':
+      case 'computed_field_unsanitized':
           $element[$delta] = array('#markup' => $display_output);
         break;
       case 'computed_field_plain':
