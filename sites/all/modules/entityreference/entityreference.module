@@ -59,6 +59,25 @@ function entityreference_field_info() {
 }
 
 /**
+ * Implements hook_flush_caches().
+ */
+function entityreference_flush_caches() {
+  // Because of the intricacies of the info hooks, we are forced to keep a
+  // separate list of the base tables of each entities, so that we can use
+  // it in entityreference_field_schema() without calling entity_get_info().
+  // See http://drupal.org/node/1416558 for details.
+  $base_tables = array();
+  foreach (entity_get_info() as $entity_type => $entity_info) {
+    if (!empty($entity_info['base table']) && !empty($entity_info['entity keys']['id'])) {
+      $base_tables[$entity_type] = array($entity_info['base table'], $entity_info['entity keys']['id']);
+    }
+  }
+  // We are using a variable because cache is going to be cleared right after
+  // hook_flush_caches() is finished.
+  variable_set('entityreference:base-tables', $base_tables);
+}
+
+/**
  * Implements hook_menu().
  */
 function entityreference_menu() {
@@ -86,9 +105,14 @@ function entityreference_menu() {
  * Implements hook_field_is_empty().
  */
 function entityreference_field_is_empty($item, $field) {
-  return !isset($item['target_id']) || !is_numeric($item['target_id']);
-}
+  $empty = !isset($item['target_id']) || !is_numeric($item['target_id']);
 
+  // Invoke the behaviors to allow them to override the empty status.
+  foreach (entityreference_get_behavior_handlers($field) as $handler) {
+    $handler->is_empty_alter($empty, $item, $field);
+  }
+  return $empty;
+}
 
 /**
  * Get the behavior handlers for a given entityreference field.
@@ -117,7 +141,7 @@ function entityreference_get_behavior_handlers($field, $instance = NULL) {
         continue;
       }
 
-      $object_cache[$identifier][] = _entityreference_get_behavior_handler($behavior, $field, $instance);
+      $object_cache[$identifier][] = _entityreference_get_behavior_handler($behavior);
     }
   }
 
@@ -130,7 +154,7 @@ function entityreference_get_behavior_handlers($field, $instance = NULL) {
  * @param $handler
  *   The behavior handler name.
  */
-function _entityreference_get_behavior_handler($behavior, $field, $instance = NULL) {
+function _entityreference_get_behavior_handler($behavior) {
   $object_cache = drupal_static(__FUNCTION__);
 
   if (!isset($object_cache[$behavior])) {
@@ -138,7 +162,7 @@ function _entityreference_get_behavior_handler($behavior, $field, $instance = NU
     $class = ctools_plugin_load_class('entityreference', 'behavior', $behavior, 'class');
 
     $class = class_exists($class) ? $class : 'EntityReference_BehaviorHandler_Broken';
-    $object_cache[$behavior] = new $class($behavior, $field, $instance);
+    $object_cache[$behavior] = new $class($behavior);
   }
 
   return $object_cache[$behavior];
@@ -184,9 +208,13 @@ function entityreference_field_load($entity_type, $entities, $field, $instances,
 function entityreference_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   $ids = array();
   foreach ($items as $delta => $item) {
-    if (!entityreference_field_is_empty($item, $field)) {
+    if (!entityreference_field_is_empty($item, $field) && $item['target_id'] !== NULL) {
       $ids[$item['target_id']] = $delta;
     }
+  }
+
+  if (!$ids) {
+    return;
   }
 
   $valid_ids = entityreference_get_selection_handler($field, $instance)->validateReferencableEntities(array_keys($ids));
@@ -393,8 +421,8 @@ function _entityreference_get_behavior_elements(&$element, $field, $instance, $l
         '#disabled' => $plugin['force enabled'],
       );
 
-      $handler = _entityreference_get_behavior_handler($name, $field, $instance);
-      if ($behavior_elements = $handler->settingsForm()) {
+      $handler = _entityreference_get_behavior_handler($name);
+      if ($behavior_elements = $handler->settingsForm($field, $instance)) {
         $enable_element = $level == 'field' ? 'field[settings][handler_settings][behaviors]' : 'instance[settings][behaviors]';
         foreach ($behavior_elements as $key => &$behavior_element) {
           $behavior_element += array(
@@ -421,7 +449,7 @@ function entityreference_get_accessible_behavior_plugins($field, $instance) {
   ctools_include('plugins');
   $plugins = array('field' => array(), 'instance' => array());
   foreach (ctools_get_plugins('entityreference', 'behavior') as $name => $plugin) {
-    $handler = _entityreference_get_behavior_handler($name, $field, $instance);
+    $handler = _entityreference_get_behavior_handler($name);
     $level = $plugin['behavior type'];
     if ($handler->access($field, $instance)) {
       $plugins[$level][$name] = $plugin;
@@ -507,8 +535,10 @@ function entityreference_field_widget_info() {
  * Implements hook_field_widget_info_alter().
  */
 function entityreference_field_widget_info_alter(&$info) {
-  $info['options_select']['field types'][] = 'entityreference';
-  $info['options_buttons']['field types'][] = 'entityreference';
+  if (module_exists('options')) {
+    $info['options_select']['field types'][] = 'entityreference';
+    $info['options_buttons']['field types'][] = 'entityreference';
+  }
 }
 
 /**
@@ -809,34 +839,39 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
   // Collect every possible entity attached to any of the entities.
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
-      $target_ids[] = $item['target_id'];
+      if (isset($item['target_id'])) {
+        $target_ids[] = $item['target_id'];
+      }
     }
   }
 
   if ($target_ids) {
     $target_entities = entity_load($field['settings']['target_type'], $target_ids);
+  }
+  else {
+    $target_entities = array();
+  }
 
-    // Iterate through the fieldable entities again to attach the loaded data.
-    foreach ($entities as $id => $entity) {
-      $rekey = FALSE;
+  // Iterate through the fieldable entities again to attach the loaded data.
+  foreach ($entities as $id => $entity) {
+    $rekey = FALSE;
 
-      foreach ($items[$id] as $delta => $item) {
-        // Check whether the referenced entity could be loaded and that the user has access to it.
-        if (isset($target_entities[$item['target_id']]) && entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']])) {
-          // Replace the instance value with the term data.
-          $items[$id][$delta]['entity'] = $target_entities[$item['target_id']];
-        }
-        // Otherwise, unset the instance value, since the entity does not exists or should not be accessible.
-        else {
-          unset($items[$id][$delta]);
-          $rekey = TRUE;
-        }
+    foreach ($items[$id] as $delta => $item) {
+      // Check whether the referenced entity could be loaded and that the user has access to it.
+      if (isset($target_entities[$item['target_id']]) && entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']])) {
+        // Replace the instance value with the term data.
+        $items[$id][$delta]['entity'] = $target_entities[$item['target_id']];
       }
-
-      if ($rekey) {
-        // Rekey the items array.
-        $items[$id] = array_values($items[$id]);
+      // Otherwise, unset the instance value, since the entity does not exists or should not be accessible.
+      else {
+        unset($items[$id][$delta]);
+        $rekey = TRUE;
       }
+    }
+
+    if ($rekey) {
+      // Rekey the items array.
+      $items[$id] = array_values($items[$id]);
     }
   }
 }
