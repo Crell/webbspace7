@@ -15,7 +15,7 @@ function webbspace_test_install() {
 
 function webbspace_test_logs(&$nodes) {
   $node = new stdClass();
-  $node->type = 'board';
+  $node->type = 'log_entry';
   node_object_prepare($node);
   $node->language = LANGUAGE_NONE;
   $node->title =  '';
@@ -28,7 +28,7 @@ function webbspace_test_logs(&$nodes) {
   $nodes[$node->title] = $node->nid;
 
   $node = new stdClass();
-  $node->type = 'board';
+  $node->type = 'log_entry';
   node_object_prepare($node);
   $node->language = LANGUAGE_NONE;
   $node->title =  '';
